@@ -18,6 +18,48 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
+  callbacks: {
+    async session({ token, session }) {
+      // declare which values are accessible when requesting session data from next-auth
+      // via getServerSession()
+      if (token) {
+        // next-auth is aware of this session type via `types/next-auth.d.ts`
+        session.user.id = token.id;
+        session.user.name = token.name;
+        session.user.email = token.email;
+        session.user.image = token.picture;
+        session.user.username = token.username;
+      }
+      return session;
+    },
+
+    async jwt({ token, user }) {
+      const dbUser = await db.user.findFirst({
+        where: {
+          email: token.email,
+        },
+      });
+
+      if (!dbUser) {
+        token.id = user!.id;
+        return token;
+      }
+
+      // username error because default next-auth prisma tables don't include a username column
+      if (!dbUser.username) {
+        await db.user.update({
+          where: {
+            id: dbUser.id,
+          },
+          data: {
+            username: nanoid(10),
+          },
+        });
+      }
+
+      return token;
+    },
+  },
   // callbacks: {
   //   async session({ token, session }) {
   //     if (token) {
