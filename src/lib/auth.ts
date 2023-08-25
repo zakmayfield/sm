@@ -45,7 +45,7 @@ export const authOptions: NextAuthOptions = {
         return token;
       }
 
-      // username error because default next-auth prisma tables don't include a username column
+      // username will typeerror because default next-auth prisma tables don't include a username column
       if (!dbUser.username) {
         await db.user.update({
           where: {
