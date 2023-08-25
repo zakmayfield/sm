@@ -45,14 +45,16 @@ export const authOptions: NextAuthOptions = {
         return token;
       }
 
-      // username will typeerror because default next-auth prisma tables don't include a username column
+      // username will typeerror IF default next-auth prisma tables don't include a username column
       if (!dbUser.username) {
+        const generatedUsername = nanoid(10);
+
         await db.user.update({
           where: {
             id: dbUser.id,
           },
           data: {
-            username: nanoid(10),
+            username: generatedUsername,
           },
         });
       }
@@ -71,3 +73,5 @@ export const authOptions: NextAuthOptions = {
     },
   },
 };
+
+export const getAuthSession = () => getServerSession(authOptions);
