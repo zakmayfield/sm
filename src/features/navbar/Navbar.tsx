@@ -1,6 +1,9 @@
+import { getAuthSession } from '@/lib/auth';
 import Link from 'next/link';
 
 export default async function Navbar() {
+  const session = await getAuthSession();
+  console.log(session);
   return (
     <nav className='flex items-center gap-6'>
       {/* logo */}
@@ -17,9 +20,13 @@ export default async function Navbar() {
         </li>
       </ul>
 
-      <div>
-        <Link href='/sign-in'>Sign In</Link>
-      </div>
+      {session ? (
+        <p>Hello User</p>
+      ) : (
+        <div>
+          <Link href='/sign-in'>Sign In</Link>
+        </div>
+      )}
     </nav>
   );
 }
